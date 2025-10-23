@@ -1,28 +1,28 @@
 services:
-  node_app:
-    image: layducky/devops-intern-assignment:latest
-    ports:
-      - "80:3000"
-    networks:
-      - app-network
-    deploy:
-      replicas: 3
-      restart_policy:
-        condition: any
-      update_config:
-        parallelism: 1
-        delay: 5s
-      resources:
-        limits:
-          cpus: "0.5"
-          memory: 512M
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000" ]
-      interval: 10s
-      timeout: 3s
-      retries: 3
-      start_period: 30s
+    node_app:
+        image: layducky/devops-intern-assignment:latest
+        ports:
+            - '80:3000'
+        networks:
+            - app-network
+        deploy:
+            replicas: 3
+            restart_policy:
+                condition: any
+            update_config:
+                parallelism: 1
+                delay: 5s
+            resources:
+                limits:
+                    cpus: '0.5'
+                    memory: 512M
+        healthcheck:
+            test: ['CMD', 'curl', '-f', 'http://localhost:3000']
+            interval: 10s
+            timeout: 3s
+            retries: 3
+            start_period: 30s
 
 networks:
-  app-network:
-    external: true
+    app-network:
+        external: true
