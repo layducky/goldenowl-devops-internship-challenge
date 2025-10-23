@@ -82,6 +82,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             docker pull layducky/devops-intern-assignment:latest
-            docker stop node_app || true
-            docker rm node_app || true
-            docker run -d --name node_app -p 80:3000 layducky/devops-intern-assignment:latest
+            docker stack deploy -c /home/ubuntu/docker-stack.yml node-stack
+            docker image prune -f
+            
