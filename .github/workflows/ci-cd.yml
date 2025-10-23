@@ -22,15 +22,19 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-
+        working-directory: ./src
+        
       - name: Run lint check
         run: npm run lint:check
+        working-directory: ./src
 
       - name: Run format check
         run: npm run format:check
+        working-directory: ./src
 
       - name: Run unit tests
         run: npm test
+        working-directory: ./src
 
       - name: Test Docker build (dry-run)
         run: docker build -t ci-test ./src
