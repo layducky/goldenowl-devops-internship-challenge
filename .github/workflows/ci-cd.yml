@@ -4,9 +4,48 @@ on:
   push:
     branches:
       - master
+      - 'feature/*'
 
 jobs:
-  build:
+  ci:
+    name: Continuous Integration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run lint check
+        run: npm run lint:check
+
+      - name: Run format check
+        run: npm run format:check
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Test Docker build (dry-run)
+        run: docker build -t ci-test ./src
+
+      - name: Run test container
+        run: |
+          docker run -d --rm -p 3000:3000 --name ci-container ci-test
+          sleep 5
+          docker ps | grep ci-container
+          docker stop ci-container
+
+  cd:
+    name: Build and Push Docker Image
+    needs: ci
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
 
     steps:
