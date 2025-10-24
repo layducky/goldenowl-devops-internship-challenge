@@ -74,14 +74,17 @@ jobs:
           tags: layducky/devops-intern-assignment:latest
           cache-from: type=registry,ref=layducky/devops-intern-assignment:latest
           
+      - name: Configure SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
       - name: Copy stack file to EC2
-        uses: appleboy/scp-action@v0.1.1
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: ./docker-stack.yml
-          target: /home/ubuntu/docker-stack.yml
+        run: |
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ./docker-stack.yml ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/
+
 
 
       - name: Deploy to EC2 via SSH
