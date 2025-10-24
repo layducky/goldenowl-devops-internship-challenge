@@ -48,5 +48,5 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: ./src/docker-stack.yml
+          source: ${{ github.workspace }}/docker-stack.yml
           target: /home/ubuntu/docker-stack.yml
