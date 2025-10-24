@@ -1,55 +1,13 @@
-name: Build and Push Docker Image
+name: Test Secrets and Connections
 
 on:
   push:
     branches:
-      - master
-      - 'feature/*'
+      - test
 
 jobs:
   ci:
-    name: Continuous Integration
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install dependencies
-        run: npm install
-        working-directory: ./src
-        
-      - name: Run lint check
-        run: npm run lint:check
-        working-directory: ./src
-
-      - name: Run format check
-        run: npm run format:check
-        working-directory: ./src
-
-      - name: Run unit tests
-        run: npm test
-        working-directory: ./src
-
-      - name: Test Docker build (dry-run)
-        run: docker build -t ci-test ./src
-
-      - name: Run test container
-        run: |
-          docker run -d --rm -p 3000:3000 --name ci-container ci-test
-          sleep 5
-          docker ps | grep ci-container
-          docker stop ci-container
-
-  cd:
-    name: Build and Push Docker Image
-    needs: ci
-    if: github.ref == 'refs/heads/master'
+    name: Verify Secrets and Connections
     runs-on: ubuntu-latest
 
     steps:
@@ -59,39 +17,27 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Docker Hub
+      - name: Verify Docker Hub login
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push Docker image
+      - name: Build Docker image (no push)
         uses: docker/build-push-action@v5
         with:
           context: ./src
           file: ./src/Dockerfile
-          push: true
-          tags: layducky/devops-intern-assignment:latest
-          cache-from: type=registry,ref=layducky/devops-intern-assignment:latest
-          
-      - name: Copy stack file to EC2
-        uses: appleboy/scp-action@v0.1.1
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: ./docker-stack.yml
-          target: /home/ubuntu/docker-stack.yml
+          push: false
+          tags: test/devops-intern-assignment:latest
 
-
-      - name: Deploy to EC2 via SSH
+      - name: Test SSH Connection to EC2
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            docker pull layducky/devops-intern-assignment:latest
-            docker stack deploy -c /home/ubuntu/docker-stack.yml node-stack
-            docker image prune -f
-            
+            echo "✅ SSH connection successful"
+            hostname
+            docker --version
