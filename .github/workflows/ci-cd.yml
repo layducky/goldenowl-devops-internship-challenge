@@ -41,3 +41,12 @@ jobs:
             echo "✅ SSH connection successful"
             hostname
             docker --version
+      
+      - name: Copy stack file to EC2
+        uses: appleboy/scp-action@v0.1.1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: ./docker-stack.yml
+          target: /home/ubuntu/docker-stack.yml
