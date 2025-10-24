@@ -74,6 +74,16 @@ jobs:
           tags: layducky/devops-intern-assignment:latest
           cache-from: type=registry,ref=layducky/devops-intern-assignment:latest
           
+      - name: Copy stack file to EC2
+        uses: appleboy/scp-action@v0.1.1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: ./src/docker-stack.yml
+          target: /home/ubuntu/docker-stack.yml
+
+
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -82,6 +92,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             docker pull layducky/devops-intern-assignment:latest
-            docker stack deploy -c /home/ubuntu/goldenowl-devops-internship-challenge/docker-stack.yml node-stack
+            docker stack deploy -c /home/ubuntu/docker-stack.yml node-stack
             docker image prune -f
             
